@@ -1,11 +1,3 @@
-/*
-    Input ist ein Array a hashtags
-    Er soll "Humanlike" zufällig Sachen mit diesen Hashtags liken
-    Nur neue Tweets (seid der letzten Abfrage)
-    Dort über Random auswählen, ob der Tweet geliked wird. 
-    Höhere Wahrscheinlichkeit bei Tweets, die bereits mehr Likes haben.
-*/
-
 /*------------------------------------------------------
   ---                   PARAMETERS                   ---
   ------------------------------------------------------*/
@@ -17,10 +9,33 @@ var parameters = {
         access_token_secret: '4c0y7O1Z1EXl946TuRyJIIwlf4qlVdNijDKfqk0dIjyX8'
     },
     hashtags: [
-        'coding',
-        'hacking'
+        'gamedev',
+        'indiedev',
+        'pixelart',
+        'madewithunity',
+        'unity3d',
+        'ar',
+        'arkit',
+        'websitedesign',
+        'webdesign',
+        'graphicdesign',
+        'design',
+        'digital',
+        'dribbble',
+        'ux'
     ],
+    numberOfResultsPerHashtag: 50,
     interval: 3, //Interval in hours
+    tweetLikeDefaultPropability: 0.3,
+    tweetLikePropabilities: [
+        {
+            minLikes: 3,
+            maxLikes: 33,
+            propability: 0.7
+        }
+    ],
+    tweetLikeIntervalMin: 2,
+    tweetLikeIntervalMax: 10
 };
 
 
@@ -54,6 +69,7 @@ function InitTwitterWrapper() {
         parameters.twitterAccess.consumer_secret,
         parameters.twitterAccess.access_token_key,
         parameters.twitterAccess.access_token_secret,
+        parameters.numberOfResultsPerHashtag
     );
 };
 
@@ -66,9 +82,12 @@ var mainLoopFunction = function() {
             console.log("Trying to find posts for #" + parameters.hashtags[i]);
             twitterWrapper.GetTweetsByHashtag(parameters.hashtags[i], currentSinceId, function (tweets) {
                 for(var t = 0; t < tweets.length; t++) {
-                    var favThreshold = 0.3;
-                    if(tweets[t].favorite_count > 3 && tweets[3] < 30) {
-                        favThreshold = 0.7;
+                    var favThreshold = parameters.tweetLikeDefaultPropability;
+                    for(var lp = 0; lp < parameters.tweetLikePropabilities.length; lp++) {
+                        if(tweets[t].favorite_count > parameters.tweetLikePropabilities[lp].minLikes &&
+                           tweets[t].favorite_count < parameters.tweetLikePropabilities[lp].maxLikes) {
+                            favThreshold = parameters.tweetLikePropabilities[lp].propability;
+                        }                           
                     }
 
                     if(Math.random() < favThreshold) {
@@ -119,7 +138,7 @@ var likeLoopFunction = function() {
         else {
             likeLoop = null;
         }
-    }, (Math.random() * 8 + 2) * 1000);
+    }, (Math.random() * (parameters.tweetLikeIntervalMax - parameters.tweetLikeIntervalMin) + parameters.tweetLikeIntervalMin) * 1000);
 }
 
 mainLoopFunction();

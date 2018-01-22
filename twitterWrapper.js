@@ -7,7 +7,7 @@
 //     }
 // });
 
-function TwitterWrapper (consumer_key, consumer_secret, access_token_key, access_token_secret) {
+function TwitterWrapper (consumer_key, consumer_secret, access_token_key, access_token_secret, numberOfResultsPerHashtag) {
     var Twitter = require('twitter');
     this.endpoint = new Twitter({
         consumer_key: consumer_key,
@@ -15,13 +15,17 @@ function TwitterWrapper (consumer_key, consumer_secret, access_token_key, access
         access_token_key: access_token_key,
         access_token_secret: access_token_secret
     });
+    if(numberOfResultsPerHashtag < 1 || numberOfResultsPerHashtag > 100) {
+        throw new Error("Die Twitter-API erlaubt nur zwischen 1 und 100 Tweets als Rückgabewert.");
+    }
+    this.NumberOfResultsPerHashtag = numberOfResultsPerHashtag;
 };
 
 TwitterWrapper.prototype.GetTweetsByHashtag = function(hashtag, since_id, OnSuccess, OnError) {
     this.endpoint.get('search/tweets.json', {
         q: '%23' + hashtag,
         since_id: since_id || 0,
-        count: 50,
+        count: this.NumberOfResultsPerHashtag,
         include_entities: true
     }, function(error, tweets, response) {
         if(error) {
