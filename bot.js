@@ -79,6 +79,10 @@ var mainLoopFunction = function() {
                         console.log("Tweet [" + tweets[t].id_str + "] has lost to the randomness");
                     }
                 }
+
+                if(tweets[tweets.length - 1].id > persistentStorage.since_id) {
+                    persistentStorage.since_id = tweets[tweets.length - 1].id;
+                }
             }, function(error) {
                 console.log("ERROR");
                 console.log(error);

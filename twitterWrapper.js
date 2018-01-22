@@ -21,7 +21,7 @@ TwitterWrapper.prototype.GetTweetsByHashtag = function(hashtag, since_id, OnSucc
     this.endpoint.get('search/tweets.json', {
         q: '%23' + hashtag,
         since_id: since_id || 0,
-        count: 5,
+        count: 50,
         include_entities: true
     }, function(error, tweets, response) {
         if(error) {
